@@ -13,26 +13,10 @@
 
 </head>
 
-<!-- <h3>Math Test Score</h3> -->
-
 <body>
 
-<!-- <div class="container">
-  <div class="left-div">
-    <svg class="chart"></svg>
-  </div>
-
-  <div class="right-div">
-
-    <button onclick="render('median','READ')">Reading</button>
-    <button onclick="render('median','SCIE')">Science</button>
-
-    <button onclick="render('cname','')">Sort by Country Name</button>
-    <button onclick="render('gdp','')">Sort by GDP</button>
-  </div>
-</div> -->
-
 <div class="container-fluid">
+
 <div class="row">
   <nav class="navbar navbar-default">
     <div class="container-fluid">
@@ -40,8 +24,8 @@
         <a class="navbar-brand" href="#">PISA 2012</a>
       </div>
     <ul class="nav navbar-nav">
-      <li><a href="#">Performance Comparison</a></li>
-      <li><a href="lp.html">Low performance</a></li>
+      <li><a href="index.html">Performance Comparison</a></li>
+      <li><a href="#">Low performance</a></li>
       <li><a href="#">Low Performance Analysis</a></li>
     </ul>
   </div>
@@ -50,14 +34,6 @@
 
 </div>
 
-<div class="row">
-
-  <ul class="nav nav-tabs">
-    <li><a href="#" onClick="render('','MATH')"> Math</a></li>
-    <li><a href="#" onClick="render('','READ')"> Reading</a></li>
-    <li><a href="#" onClick="render('','SCIE')"> Science</a></li>
-  </ul>
-</div>
 
 <div class="row">
   <div class="col-sm-9 comment">
@@ -79,16 +55,12 @@
     <svg class="chart"></svg>
   </div>
   <div class="col-sm-3">
-
-    <div class="dropdown">
-      <button class="btn btn-primary dropdown-toggle" type="button"
-          data-toggle="dropdown">Sort by<span class="caret"></span>
-      </button>
-        <ul class="dropdown-menu">
-        <li><a href="#" onClick="render('median','')"> Peformance Median</a></li>
-        <li><a href="#" onClick="render('cname','')"> Country Name</a></li>
-        <li><a href="#" onClick="render('gdp','')"> Country GDP</a></li>
-      </ul>
+    <label> Select countries </label>
+    <div class="chb_countries">
+      <div class="checkbox">
+        <label><input type="checkbox" class="chbox_all" value=""  onClick="toggle(this)">
+          Select All</label>
+      </div>
     </div>
 
   </div>
@@ -96,10 +68,10 @@
 </div>
 
 
-<!-- <script src="//d3js.org/d3.v4.min.js" charset="utf-8"></script> -->
 
-<script src="//d3js.org/d3.v3.min.js" charset="utf-8"></script>
-<script src="js/render.js" charset="utf-8"></script>
+<script src="//d3js.org/d3.v4.min.js" charset="utf-8"></script>
+<!-- <script src="//d3js.org/d3.v3.min.js" charset="utf-8"></script> -->
+<script src="js/lperf.js" charset="utf-8"></script>
 
 
 </body>

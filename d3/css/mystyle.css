@@ -1,0 +1,88 @@
+.range_bar {
+  fill: steelblue;
+  opacity: 0.3
+}
+
+.median_bar {
+  fill: steelblue;
+  opacity: 0.8
+}
+
+.iqr_bar {
+  fill: steelblue;
+  opacity: 0.5
+}
+
+
+.bar:hover {
+  fill: yellow;
+  opacity: 0.3;
+}
+
+
+.axis text {
+  font: 12px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {
+  display: none;
+}
+
+button {
+    margin: 0 7px 0 0;
+    background-color: #f5f5f5;
+    border: 1px solid #dedede;
+    border-top: 1px solid #eee;
+    border-left: 1px solid #eee;
+
+    font-size: 12px;
+    line-height: 130%;
+    text-decoration: none;
+    font-weight: bold;
+    color: #565656;
+    cursor: pointer;
+}
+
+.comment
+{
+    margin: 10px 10px 10px 10px;
+}
+
+.container
+{
+     text-align: left;
+}
+.left-div
+{
+     display: inline-block;
+     /*max-width: 1000px;*/
+     vertical-align: top;
+}
+.right-div
+{
+     display: inline-block;
+     max-width: 150px;
+}
+
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+
+.legend {
+  margin: 10px 10px 10px 10px;
+}
+
+.chb_countries {
+  height: 500px;
+  overflow:auto;
+
+}
