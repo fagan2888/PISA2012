@@ -3,21 +3,19 @@ library(Hmisc)
 pisadat <- read.csv("../data/pisadat_all.csv", na.strings = c("", " ", "nan"))
 
 
-df_MATH <- data.frame(CODE=NA, CNT=NA, MATH_mean=NA, MATH_quant_05=NA, 
+df <- data.frame(CODE=NA, CNT=NA, MATH_mean=NA, MATH_quant_05=NA, 
                 MATH_quant_25=NA, MATH_quant_50=NA, MATH_quant_75=NA,
-                MATH_quant_95=NA, MATHLP_perc=NA, LPANY_perc=NA,
-                LPALL_perc=NA)[numeric(0), ]
+                MATH_quant_95=NA,  READ_mean=NA, READ_quant_05=NA, 
+                READ_quant_25=NA, READ_quant_50=NA, READ_quant_75=NA,
+                READ_quant_95=NA,  SCIE_mean=NA, SCIE_quant_05=NA, 
+                SCIE_quant_25=NA, SCIE_quant_50=NA, SCIE_quant_75=NA,
+                SCIE_quant_95=NA)[numeric(0), ]
 
-df_READ <- data.frame(CODE=NA, CNT=NA, READ_mean=NA, READ_quant_05=NA, 
-                      READ_quant_25=NA, READ_quant_50=NA, READ_quant_75=NA,
-                      READ_quant_95=NA, READLP_perc=NA, LPANY_perc=NA,
-                      LPALL_perc=NA)[numeric(0), ]
+df_lp <- data.frame(CODE=NA, CNT=NA, MATHLP_perc=NA, READLP_perc=NA, 
+                    SCIELP_perc=NA, LPANY_perc=NA, LPALL_perc=NA,
+                    MATHLP_notall_perc=NA)[numeric(0), ]
 
-df_SCIE <- data.frame(CODE=NA, CNT=NA, SCIE_mean=NA, SCIE_quant_05=NA, 
-                      SCIE_quant_25=NA, SCIE_quant_50=NA, SCIE_quant_75=NA,
-                      SCIE_quant_95=NA, SCIELP_perc=NA, LPANY_perc=NA,
-                     LPALL_perc=NA)[numeric(0), ]
-
+pisadat$MATH_ISLP_notall <- pisadat$MATH_ISLP * (1-pisadat$ISLP_ALL)
 
 for (code in levels(pisadat$CODE)) {
   data <- subset(pisadat, CODE == code)
@@ -37,36 +35,34 @@ for (code in levels(pisadat$CODE)) {
   LPANY_perc <- wtd.mean(data$ISLP_ANY, weights = data$WEIGHT)
   LPALL_perc <- wtd.mean(data$ISLP_ALL, weights = data$WEIGHT)
   
-  df_MATH[nrow(df_MATH)+1,] <- c(code, CNT, MATH_mean, MATH_quant, MATHLP_perc, 
-                    LPANY_perc, LPALL_perc)
+  MATHLP_notall_perc <- wtd.mean(data$MATH_ISLP_notall, weights = data$WEIGHT)
   
-  df_READ[nrow(df_READ)+1,] <- c(code, CNT, READ_mean, READ_quant, READLP_perc, 
-                            LPANY_perc, LPALL_perc)
+  df[nrow(df)+1,] <- c(code, CNT, MATH_mean, MATH_quant, 
+                     READ_mean, READ_quant, 
+                    SCIE_mean, SCIE_quant)
   
-  df_SCIE[nrow(df_SCIE)+1,] <- c(code, CNT, SCIE_mean, SCIE_quant, SCIELP_perc, 
-                            LPANY_perc, LPALL_perc)
+  df_lp[nrow(df_lp)+1,] <- c(code, CNT, MATHLP_perc, READLP_perc, SCIELP_perc,
+                             LPANY_perc, LPALL_perc, MATHLP_notall_perc)
   
   
 }
 
-stat_MATH_file <- "country_stat_MATH.csv"
-stat_READ_file <- "country_stat_READ.csv"
-stat_SCIE_file <- "country_stat_SCIE.csv"
+df_lp_srt <- df_lp[order(df_lp$LPANY_perc),]
+
+stat_file <- "country_stat.csv"
+lp_file <- "country_lp.csv"
 
 args <- commandArgs(trailingOnly = TRUE)
 path <- args[1]
 if (!is.na(path)) {
-  stat_MATH_file <- paste(path, stat_MATH_file, sep="/")
-  stat_READ_file <- paste(path, stat_READ_file, sep="/")
-  stat_SCIE_file <- paste(path, stat_SCIE_file, sep="/")
+  stat_file <- paste(path, stat_file, sep="/")
+  lp_file <- paste(path, lp_file, sep="/")
 }
 
-write.csv(df_MATH, stat_MATH_file, row.names = FALSE)
-write.csv(df_READ, stat_READ_file, row.names = FALSE)
-write.csv(df_SCIE, stat_SCIE_file, row.names = FALSE)
+write.csv(df, stat_file, row.names = FALSE)
+write.csv(df_lp_srt, lp_file, row.names = FALSE)
 
-
-msg = paste("Calculated aggregate country statistics are saved in files: ",
-            stat_SCIE_file, stat_READ_file, stat_MATH_file)
+msg = paste("Calculated aggregate country statistics are saved in file: ",
+            stat_file)
 print(msg)
 

@@ -30,29 +30,22 @@ def do_logreg(cldata_file, clogstat_file):
     countries_logstat = lr.calc_countries(pisadat, codes)
     countries_logstat.to_csv(clogstat_file, index=False)
 
-def do_addGDP(cstatfile_MATH, cstatfile_READ, cstatfile_SCIE,
-                cstatfile_MATH_new, cstatfile_READ_new, cstatfile_SCIE_new):
+def do_addGDP(cstatfile, cstatfile_new):
     """
-    cstatfile(_MATH,_READ, _SCIE) - file path to read countries statistics
+    cstatfile - file path to read countries statistics
                 file. It is prepared by R code
-    cstatfile(_MATH,_READ, _SCIE)_new - file path to save countries statistics
+    cstatfile_new - file path to save countries statistics
                 aggregated with GDP data
     """
     print "Add GDP to country stat"
 
-    cstat_files = [cstatfile_MATH, cstatfile_READ, cstatfile_SCIE]
-    cstat_files_new = [cstatfile_MATH_new, cstatfile_READ_new, cstatfile_SCIE_new]
-
-    cstats = [pd.read_csv(cstat_file) for cstat_file in cstat_files ]
-
-
-    codes = set(itertools.chain(*[list(cstat.CODE.unique()) for cstat in cstats]))
+    cstat = pd.read_csv(cstatfile)
+    codes = cstat.CODE.unique()
     gdpdat = myutils.getGDP(codes)
 
-    for i, cstat in enumerate(cstats):
-        data = pd.merge(cstat, gdpdat[["iso3c", "GDP"]],
+    data = pd.merge(cstat, gdpdat[["iso3c", "GDP"]],
                     right_on="iso3c", left_on="CODE", how="left")
-        data.to_csv(cstat_files_new[i], index=False)
+    data.to_csv(cstatfile_new, index=False)
 
 def do_sample(datafile, perc, smplpath):
         sample = myutils.getSample(datafile, perc)
@@ -72,13 +65,8 @@ if __name__ == "__main__":
     cldata_file =  "../data/pisadat_all.csv"
     clogstat_file = "countries_logreg_stat.csv"
 
-    cstatfile_MATH = "../R/country_stat_MATH.csv"
-    cstatfile_READ = "../R/country_stat_READ.csv"
-    cstatfile_SCIE = "../R/country_stat_SCIE.csv"
-
-    cstatfile_MATH_new = "../R/country_stat_MATH_gdp.csv"
-    cstatfile_READ_new = "../R/country_stat_READ_gdp.csv"
-    cstatfile_SCIE_new = "../R/country_stat_SCIE_gdp.csv"
+    cstatfile = "../R/country_stat.csv"
+    cstatfile_new = "../R/country_stat_gdp.csv"
 
     for arg in sys.argv[1:]:
         if arg == 'clean':
@@ -91,8 +79,7 @@ if __name__ == "__main__":
             msg = subprocess.check_output(cmd, universal_newlines=True)
             print msg
         if arg == "addGDP":
-            do_addGDP(cstatfile_MATH, cstatfile_READ, cstatfile_SCIE,
-                    cstatfile_MATH_new, cstatfile_READ_new, cstatfile_SCIE_new)
+            do_addGDP(cstatfile, cstatfile_new)
         if arg == "sample":
             perc = 0.2
             smplpath = "../data/sample.csv"

@@ -26,7 +26,7 @@ def logreg(data):
 
 def calc_countries(pisadat, codes):
 
-    countries_stat = pd.DataFrame(columns = ['CODE', 'GENDER', 'PRIMED',
+    countries_stat = pd.DataFrame(columns = ['CODE', 'CNT', 'GENDER', 'PRIMED',
             'ESCS_GR', 'FAMSTRUC', 'IMMIG', 'SCHTYPE', "SCHLOC",
             'GENDER_sgnf', 'PRIMED_sgnf', 'ESCS_GR_sgnf', 'FAMSTRUC_sgnf',
             'IMMIG_sgnf', 'SCHTYPE_sgnf', "SCHLOC_sgnf",
@@ -34,6 +34,7 @@ def calc_countries(pisadat, codes):
             ])
     i = 0
     for code in codes:
+        CNT = pisadat[pisadat.CODE == code]["CNT"].iloc[0]
         print "Calculate " + code
         variables = ['GENDER', 'PRIMED', 'FAMSTRUC',
             'IMMIG', 'WEIGHT', 'SCHTYPE', 'SCHLOC', 'SAMELNG', 'MATH_ISLP', 'ESCS']
@@ -66,7 +67,7 @@ def calc_countries(pisadat, codes):
             F = 2*precision*recall/(precision + recall)
             n = model.nobs
 
-            countries_stat.loc[i] = [code] + list(np.exp(model.params[1:])) + \
+            countries_stat.loc[i] = [code, CNT] + list(model.params[1:]) + \
                     list(model.pvalues[1:]) + [precision, recall, specifity, F, n]
             i += 1
         except Exception:
