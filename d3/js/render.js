@@ -1,22 +1,17 @@
-var margin = {top: 130, right: 40, bottom: 20, left: 40},
+var margin = {top: 20, right: 40, bottom: 170, left: 40},
     width = 1100 - margin.left - margin.right,
-    height = 800 - margin.top - margin.bottom;
+    height = 700 - margin.top - margin.bottom;
 
-var x = d3.scale.ordinal()
-    .rangeRoundBands([0, width], .3);
+var x = d3.scaleBand()
+    .range([0, width])
+    .padding(0.1)
+    .align(0.1);
 
-var y = d3.scale.linear()
+var y = d3.scaleLinear()
     .range([height, 0]);
 
-var xAxis = d3.svg.axis()
-    .scale(x)
-    .orient("top");
-
-
-var yAxis = d3.svg.axis()
-    .scale(y)
-    .orient("left");
-
+var xAxis = d3.axisBottom(x);
+var yAxis = d3.axisLeft(y);
 
 var chart = d3.select(".chart")
     .attr("width", width + margin.left + margin.right)
@@ -75,6 +70,15 @@ function sorted_data(data,sorting) {
 }
 
 
+function toggle(source) {
+  // checkboxes = document.getElementsByClassName('chbox');
+  // for(var i=0, n=checkboxes.length;i<n;i++) {
+  //   checkboxes[i].checked = source.checked;
+  // }
+  //
+  // update();
+
+}
 
 function render(sorting, subject) {
 
@@ -156,15 +160,14 @@ function render(sorting, subject) {
       .attr("class", "y axis");
 
   chart.selectAll(".x.axis")
-    // .attr("transform", "translate(0," + (height + 10) + ")")
-    .attr("transform", "translate(0,0)")
-    .call(xAxis)
-  .selectAll("text")
-    .attr("y", 0)
-    .attr("x", 9)
-    .attr("dy", ".35em")
-    .attr("transform", "rotate(-60)")
-    .style("text-anchor", "start");
+      .attr("transform", "translate(0," + (height + 10) + ")")
+      .call(xAxis)
+    .selectAll("text")
+      .attr("y", 0)
+      .attr("x", -13)
+      .attr("dy", ".35em")
+      .attr("transform", "rotate(-75)")
+      .style("text-anchor", "end");
 
   chart.selectAll(".y.axis")
     .attr("transform", "translate(0,0)")
@@ -180,7 +183,7 @@ function render(sorting, subject) {
   chart.selectAll(".range_bar")
     .attr("y", function(d) { return y(d["quant_95"])})
     .attr("x", function(d) { return x(d["CNT"]); })
-    .attr("width", x.rangeBand())
+    .attr("width", x.bandwidth())
     .attr("height", function(d) { return -y(d["quant_95"]) + y(d["quant_05"]); })
     .select("title")
     .text(function(d, i) { return "#" + (i+1) + " " + d["CNT"]; });
@@ -188,13 +191,13 @@ function render(sorting, subject) {
   chart.selectAll(".median_bar")
     .attr("y", function(d) { return y(d["quant_50"])})
     .attr("x", function(d) { return x(d["CNT"]); })
-    .attr("width", x.rangeBand())
+    .attr("width", x.bandwidth())
     .attr("height", "3px");
 
   chart.selectAll(".iqr_bar")
     .attr("y", function(d) { return y(d["quant_75"])})
     .attr("x", function(d) { return x(d["CNT"]); })
-    .attr("width", x.rangeBand())
+    .attr("width", x.bandwidth())
     .attr("height", function(d) { return -y(d["quant_75"]) + y(d["quant_25"]); })
     .select("title")
     .text(function(d, i) { return "#" + (i+1) + " " + d["CNT"]; });
