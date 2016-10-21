@@ -79,11 +79,11 @@ function add_chbox(data) {
     .attr("checked", true);
 
 
-  items = chb_countries.selectAll(".checkbox")
+  items = chb_countries.selectAll(".checkbox.chb_country")
     .data(data)
     .enter()
     .append("div")
-    .attr("class", "checkbox")
+    .attr("class", "checkbox chb_country")
     .append("label")
     .attr("class", "chb_label")
     .append("input")
