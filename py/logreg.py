@@ -7,7 +7,7 @@ from statsmodels.formula.api import logit
 
 def wlogregr(data):
     model = wlogit("MATH_ISLP ~ C(GENDER, Treatment(reference='Male')) + C(PRIMED, Treatment(reference='Yes')) + \
-                    C(ESCS_GR, Treatment(reference='Disadv')) + \
+                    C(ESCS_GR, Treatment(reference='Adv')) + \
                   C(FAMSTRUC, Treatment(reference='Non-Single')) +  C(IMMIG, Treatment(reference='Native')) + \
                   C(SCHTYPE, Treatment(reference='Private') ) + \
                   C(SCHLOC, Treatment(reference='Urban') )",
@@ -16,7 +16,7 @@ def wlogregr(data):
 
 def logreg(data):
     model = logit("MATH_ISLP ~ C(GENDER, Treatment(reference='Male')) + C(PRIMED, Treatment(reference='Yes')) + \
-                    C(ESCS_GR, Treatment(reference='Disadv')) + \
+                    C(ESCS_GR, Treatment(reference='Adv')) + \
                   C(FAMSTRUC, Treatment(reference='Non-Single')) +  C(IMMIG, Treatment(reference='Native')) + \
                   C(SCHTYPE, Treatment(reference='Private') ) + \
                   C(SCHLOC, Treatment(reference='Urban') )",
