@@ -38,9 +38,9 @@
 <div class="row">
 
   <ul class="nav nav-tabs">
-    <li><a href="#" onClick="render('','MATH')"> Math</a></li>
-    <li><a href="#" onClick="render('','READ')"> Reading</a></li>
-    <li><a href="#" onClick="render('','SCIE')"> Science</a></li>
+    <li><a href="#" onClick="render('MATH')"> Math</a></li>
+    <li><a href="#" onClick="render('READ')"> Reading</a></li>
+    <li><a href="#" onClick="render('SCIE')"> Science</a></li>
   </ul>
 </div>
 
@@ -64,24 +64,27 @@
     <svg class="chart"></svg>
   </div>
   <div class="col-sm-3">
+
   <div class="row">
-    <div class="dropdown">
+    <div class="dropdown sort">
       <button class="btn btn-primary dropdown-toggle" type="button"
           data-toggle="dropdown">Sort by<span class="caret"></span>
       </button>
         <ul class="dropdown-menu">
-        <li><a href="#" onClick="render('median','')"> Peformance Median</a></li>
-        <li><a href="#" onClick="render('cname','')"> Country Name</a></li>
-        <li><a href="#" onClick="render('gdp','')"> Country GDP</a></li>
+        <li><a href="#" onClick="change('median')"> Peformance Median</a></li>
+        <li><a href="#" onClick="change('cname')"> Country Name</a></li>
+        <li><a href="#" onClick="change('gdp')"> Country GDP</a></li>
       </ul>
     </div>
   </div>
-  <div class=row>
-    <label> Select countries </label>
+  <hr>
+  <div class="row">
     <div class="chb_countries">
+      <label> Select countries </label>
       <div class="checkbox">
         <label><input type="checkbox" class="chbox_all" value=""  onClick="toggle(this)">
           Select All</label>
+
       </div>
     </div>
   </div>

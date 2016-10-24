@@ -1,4 +1,4 @@
-var margin = {top: 20, right: 40, bottom: 170, left: 40},
+var margin = {top: 20, right: 40, bottom: 170, left: 70},
     width = 1100 - margin.left - margin.right,
     height = 700 - margin.top - margin.bottom;
 
@@ -10,6 +10,10 @@ var x = d3.scaleBand()
 var y = d3.scaleLinear()
     .range([height, 0]);
 
+var z = d3.scaleOrdinal()
+    .range([ 0.3, 0.5, 0.8])
+
+
 var xAxis = d3.axisBottom(x);
 var yAxis = d3.axisLeft(y);
 
@@ -19,139 +23,200 @@ var chart = d3.select(".chart")
   .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-var alldata = []
-var data = []
-var glb_sorting = "median"
+var chb_countries = d3.select(".chb_countries");
+
+
+var alldata = [];
+var data = [];
+var glb_sorting = "median"; //median
+var glb_subject = "MATH";
 
 d3.csv("data/country_stat_gdp.csv", type, function(error, rows) {
-  rows.forEach(function(r) {
-                    alldata.push({
-                        CNT: r.CNT,
-                        MATH_quant_05: +r.MATH_quant_05,
-                        MATH_quant_95: +r.MATH_quant_95,
-                        MATH_quant_50: +r.MATH_quant_50,
-                        MATH_quant_25: +r.MATH_quant_25,
-                        MATH_quant_75: +r.MATH_quant_75,
-                        READ_quant_05: +r.READ_quant_05,
-                        READ_quant_95: +r.READ_quant_95,
-                        READ_quant_50: +r.READ_quant_50,
-                        READ_quant_25: +r.READ_quant_25,
-                        READ_quant_75: +r.READ_quant_75,
-                        SCIE_quant_05: +r.SCIE_quant_05,
-                        SCIE_quant_95: +r.SCIE_quant_95,
-                        SCIE_quant_50: +r.SCIE_quant_50,
-                        SCIE_quant_25: +r.SCIE_quant_25,
-                        SCIE_quant_75: +r.SCIE_quant_75,
-                        GDP: +r.GDP
 
+  alldata = ["MATH_interval90", "MATH_interval50",
+            "READ_interval90", "READ_interval50",
+            "SCIE_interval90", "SCIE_interval50",
+            "MATH_median", "READ_median", "SCIE_median"]
+            .map(function (id) {
+              var sbj = id.split("_")[0];
+              return {
+                key: id,
+                values: rows.map(function (d) {
+                  return {
+                    CNT: d.CNT,
+                    GDP: +d.GDP,
+                    median: +d[sbj + "_median_left"],
+                    left: +d[id + "_left"],
+                    right: +d[id + "_right"]
+                  }
+                })
+              }
+            })
 
-                    })
-                });
-  render("median", "MATH");
+  add_chbox(rows);
+  render(glb_subject);
 });
 
 function sorted_data(data,sorting) {
+  //! Decide how to implement sorting
+
   if (sorting == 'cname') {
-    data = data.sort(function(a,b) {
-       return d3['ascending'](a.CNT, b.CNT);
-     });
+
+    data = data.map(function (d) {
+      d.values.sort(function(a,b) {
+         return d3.ascending(a.CNT, b.CNT);
+       });
+       return d;
+    })
   }
+
   if (sorting == 'median') {
-    data = data.sort(function(a,b) {
-       return d3['ascending'](a.quant_50, b.quant_50);
-     });
+    data = data.map(function (d) {
+      d.values.sort(function(a,b) {
+         return d3.ascending(a.median, b.median);
+       });
+       return d;
+    })
   }
+
   if (sorting == 'gdp') {
-    data = data.sort(function(a,b) {
-       return d3['ascending'](a.GDP, b.GDP);
-     });
+    data = data.map(function (d) {
+      d.values.sort(function(a,b) {
+         return d3.ascending(a.GDP, b.GDP);
+       });
+       return d;
+    })
+
+
   }
   return data
 }
 
 
 function toggle(source) {
-  // checkboxes = document.getElementsByClassName('chbox');
-  // for(var i=0, n=checkboxes.length;i<n;i++) {
-  //   checkboxes[i].checked = source.checked;
-  // }
-  //
-  // update();
+  checkboxes = document.getElementsByClassName('chbox');
+  for(var i=0, n=checkboxes.length;i<n;i++) {
+    checkboxes[i].checked = source.checked;
+  }
+
+  update();
 
 }
 
-function render(sorting, subject) {
+function clname(name) {
+  return name.replace(/\s/g,"_")
+          .replace("(","")
+          .replace(")","");
+}
+
+function add_chbox(data) {
+
+  data.sort(function(a,b) {
+     return d3.ascending(a.CNT, b.CNT)});
+
+  chb_countries.selectAll(".chbox_all")
+    .attr("checked", true);
+
+
+  items = chb_countries.selectAll(".checkbox.chb_country")
+    .data(data)
+    .enter()
+    .append("div")
+    .attr("class", "checkbox chb_country")
+    .append("label")
+    .attr("class", "chb_label")
+    .append("input")
+    .attr("class", "chbox")
+    .attr("type" ,"checkbox")
+    .attr("value", function(d) {return clname(d.CNT);})
+    .attr("checked", true)
+    .on("click", update);
+
+  chb_countries.selectAll(".chb_label")
+    .append("text")
+    .text(function(d) {return d.CNT;})
+
+}
+
+function update() {
+
+
+
+  chart.selectAll(".bar.visible")
+    .style("opacity", 0.2);
+
+  checkboxes = document.getElementsByClassName('chbox');
+  for(var i=0, n=checkboxes.length;i<n;i++) {
+    if (checkboxes[i].checked) {
+      chart.selectAll(".visible." + checkboxes[i].value)
+        .style("opacity", 1);
+    }
+  }
+}
+
+
+
+function render(subject) {
 
   if (subject) {
 
+    glb_subject = subject;
     data = []
     alldata.forEach(function(d) {
-      data.push({
-        quant_05: d[subject + "_quant_05"],
-        quant_95: d[subject + "_quant_95"],
-        quant_50: d[subject + "_quant_50"],
-        quant_25: d[subject + "_quant_25"],
-        quant_75: d[subject + "_quant_75"],
-        CNT: d.CNT,
-        GDP: d.GDP
+      key = d.key;
+      sbj = key.split("_")[0]
+      if (sbj == subject) {
+        data.push(d)
+      }
       })
-    })
 
-    chart.selectAll(".range_bar")
-      .remove();
-
-    chart.selectAll(".median_bar")
-      .remove();
-
-    chart.selectAll(".iqr_bar")
-      .remove();
+      data = sorted_data(data, glb_sorting);
 
   }
-
-  if (sorting) {
-    glb_sorting = sorting
-  }
-  data = sorted_data(data, glb_sorting)
 
   chart.selectAll(".axis")
     .remove();
 
-  x.domain(data.map(function(d) { return d["CNT"]; }));
-  y.domain([130, d3.max(data, function(d) { return d["quant_95"]; }) + 5]);
+  chart.selectAll(".label")
+    .remove();
 
-  chart.selectAll(".range_bar")
-      .data(data)
-    .enter().append("rect")
-    .attr("class", "range_bar")
-    .append("title");
+  x.domain(data[0].values
+          .map(function(s) { return s.CNT; }));
 
-  chart.selectAll(".median_bar")
-      .data(data)
-    .enter().append("rect")
-    .attr("class", "median_bar");
 
-  chart.selectAll(".iqr_bar")
-      .data(data)
-    .enter().append("rect")
-    .attr("class", "iqr_bar");
+  y.domain([
+    d3.min(data, function(c) { return d3.min(c.values, function(d) { return d.left; }); }),
+    d3.max(data, function(c) { return d3.max(c.values, function(d) { return d.right; }); })
+  ]);
 
-  if (sorting == "gdp") {
-    chart.selectAll(".range_bar")
-      .filter(function (d) {return ((d.GDP === 0) || (!d.GDP))})
-      .remove();
+  z.domain(data.map(function(c) { return c.key; }));
 
-    chart.selectAll(".median_bar")
-      .filter(function (d) {return ((d.GDP === 0) || (!d.GDP))})
-      .remove();
+  var series = chart.selectAll(".serie")
+      .data(data, function (d) {return d.key;});
 
-    chart.selectAll(".iqr_bar")
-      .filter(function (d) {return ((d.GDP === 0) || (!d.GDP))})
-      .remove()
-  }
+  var series_enter = series.enter().append("g")
+    .attr("class", function(d) {return "serie " + d.key})
+    .attr("fill", "steelblue")
+    .attr("opacity", function(d) { return z(d.key); });
 
-  chart.selectAll(".bar")
-    .data(data)
-    .exit().remove();
+  series.exit().remove();
+
+  var bars = series_enter.selectAll(".bar")
+      .data(function(d) { return d.values; }, function (s) {return s.CNT;});
+
+  bars.enter().append("rect")
+      .attr("class", function(s) { return "bar " + clname(s.CNT) + " visible"})
+      .attr("x", function(s) { return x(s.CNT); })
+      .attr("y", function(s) { return y(s.right); })
+      .attr("height", function(s) {
+            var height = -y(s.right) + y(s.left);
+            return (height == 0) ? 1.0 : height;
+          })
+      .attr("width", x.bandwidth());
+
+  bars.exit().remove();
+
+
 
   chart.append("g")
       .attr("class", "x axis");
@@ -172,72 +237,131 @@ function render(sorting, subject) {
   chart.selectAll(".y.axis")
     .attr("transform", "translate(0,0)")
     .call(yAxis);
-    // .append("text")
-    // .attr("x", 40)
-    // .attr("y", width/2)
-    // .style("text-anchor", "middle")
-    // .style("font", "12px sans-serif")
-    // .text("Test Score");
 
-
-  chart.selectAll(".range_bar")
-    .attr("y", function(d) { return y(d["quant_95"])})
-    .attr("x", function(d) { return x(d["CNT"]); })
-    .attr("width", x.bandwidth())
-    .attr("height", function(d) { return -y(d["quant_95"]) + y(d["quant_05"]); })
-    .select("title")
-    .text(function(d, i) { return "#" + (i+1) + " " + d["CNT"]; });
-
-  chart.selectAll(".median_bar")
-    .attr("y", function(d) { return y(d["quant_50"])})
-    .attr("x", function(d) { return x(d["CNT"]); })
-    .attr("width", x.bandwidth())
-    .attr("height", "3px");
-
-  chart.selectAll(".iqr_bar")
-    .attr("y", function(d) { return y(d["quant_75"])})
-    .attr("x", function(d) { return x(d["CNT"]); })
-    .attr("width", x.bandwidth())
-    .attr("height", function(d) { return -y(d["quant_75"]) + y(d["quant_25"]); })
-    .select("title")
-    .text(function(d, i) { return "#" + (i+1) + " " + d["CNT"]; });
+  chart.append("text")
+    .attr("class", "y label")
+    .attr("transform", "rotate(-90)")
+    .attr("x", -height/2)
+    .attr("y", -40)
+    .style("text-anchor", "middle")
+    .style("font", "12px sans-serif")
+    .text(glb_subject + " Test Score Range");
 
 
 
 
+    if (glb_sorting == "gdp") {
+
+      nogdp = function(s) {return ((s.GDP === 0) || (!s.GDP))};
+
+      chart.selectAll(".bar")
+          .filter(nogdp)
+          .classed("visible", false)
+          .classed("invisible", true);
+
+    }
+
+    chart.selectAll(".bar.invisible")
+      .style("opacity", 0);
+
+    update();
+    // var sortTimeout = setTimeout(change, 2000);
+}
+
+function change(sorting) {
+  // clearTimeout(sortTimeout);
+  // Copy-on-write since tweens are evaluated after a delay.
+
+  glb_sorting = sorting;
+  data = sorted_data(data, sorting);
+
+  var x0 = x.domain(data[0].values
+        .map(function(s) { return s.CNT; }))
+        .copy();
+
+    chart.selectAll("." + glb_subject + "_interval90").selectAll(".bar")
+        .sort(function(a, b) { return x0(a.CNT) - x0(b.CNT); });
+
+    chart.selectAll("." + glb_subject + "_interval50").selectAll(".bar")
+            .sort(function(a, b) { return x0(a.CNT) - x0(b.CNT); });
+
+    chart.selectAll("." + glb_subject + "_median").selectAll(".bar")
+            .sort(function(a, b) { return x0(a.CNT) - x0(b.CNT); });
 
 
-  // chart.selectAll(".rtext")
-  //     .data(data)
-  //   .enter().append("text")
-  //     .attr("y", function(d) { return y(d["CNT"]) + (2/3)*y.rangeBand(); })
-  //     .attr("x", function(d) {return x(d["MATH_quant_95"]) + 4; })
-  //     .style("font", "10px sans-serif")
-  //     .text(function(d) {return  d3.format(".2f")(d["MATH_quant_95"]) });
-  //
-  //
-  // chart.selectAll(".ltext")
-  //     .data(data)
-  //   .enter().append("text")
-  //     .attr("y", function(d) { return y(d["CNT"]) + (2/3)*y.rangeBand(); })
-  //     .attr("x", function(d) {return x(d["MATH_quant_05"]) - 33; })
-  //     .style("font", "10px sans-serif")
-  //     .text(function(d) {return d3.format(".2f")(d["MATH_quant_05"]) });
+    var transition = chart.transition().duration(300),
+        delay = function(s, i) { return i * 10; };
 
 
+    var nogdp = function(s) {return ((s.GDP === 0) || (!s.GDP))};
 
-  // chart.selectAll(".rtext")
-  //             .data(data)
-  //           .exit().remove();
-  //
-  // chart.selectAll(".ltext")
-  //         .data(data)
-  //       .exit().remove()
+    chart.selectAll(".bar")
+            .filter(nogdp)
+            .classed("visible", !(glb_sorting == "gdp"))
+            .classed("invisible", (glb_sorting == "gdp"));
+
+    chart.selectAll(".bar.invisible")
+          .style("opacity", 0);
+
+    chart.selectAll(".bar.visible")
+          .style("opacity", 1);
+
+    update();
+
+    // nogdp_elem = chart.selectAll(".bar")
+    //         .filter(function (s) {return ((s.GDP === 0) || (!s.GDP))});
+    // if (sorting == "gdp") {
+    //     nogdp_elem.style("opacity", 0);
+    // }
+    // else {
+    //   nogdp_elem.style("opacity", 1);
+    // }
+
+
+    transition.selectAll("." + glb_subject + "_interval90").selectAll(".bar")
+        .delay(delay)
+        .attr("x", function(s) { return x0(s.CNT); });
+
+    transition.selectAll("." + glb_subject + "_interval50").selectAll(".bar")
+            .delay(delay)
+            .attr("x", function(s) { return x0(s.CNT); });
+
+    transition.selectAll("." + glb_subject + "_median").selectAll(".bar")
+            .delay(delay)
+            .attr("x", function(s) { return x0(s.CNT); });
+
+    transition.select(".x.axis")
+        .call(xAxis)
+      .selectAll("g")
+        .delay(delay);
 
 }
 
 
 function type(d) {
+  d["MATH_interval90_left"] = +d["MATH_quant_05"];
+  d["MATH_interval90_right"] = +d["MATH_quant_95"];
+  d["READ_interval90_left"] = +d["READ_quant_05"];
+  d["READ_interval90_right"] = +d["READ_quant_95"];
+  d["SCIE_interval90_left"] = +d["SCIE_quant_05"];
+  d["SCIE_interval90_right"] = +d["SCIE_quant_95"];
+
+  d["MATH_interval50_left"] = +d["MATH_quant_25"];
+  d["MATH_interval50_right"] = +d["MATH_quant_75"];
+  d["READ_interval50_left"] = +d["READ_quant_25"];
+  d["READ_interval50_right"] = +d["READ_quant_75"];
+  d["SCIE_interval50_left"] = +d["SCIE_quant_25"];
+  d["SCIE_interval50_right"] = +d["SCIE_quant_75"];
+
+  d["MATH_median_left"] = +d["MATH_quant_50"];
+  d["READ_median_left"] = +d["READ_quant_50"];
+  d["SCIE_median_left"] = +d["SCIE_quant_50"];
+  d["MATH_median_right"] = +d["MATH_quant_50"];
+  d["READ_median_right"] = +d["READ_quant_50"];
+  d["SCIE_median_right"] = +d["SCIE_quant_50"];
+
+
+
   d["MATH_quant_95"] = +d["MATH_quant_95"];
   d["MATH_quant_05"] = +d["MATH_quant_05"];
   return d;
