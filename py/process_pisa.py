@@ -22,13 +22,20 @@ def do_clean(studfile, schoolfile,  cldata_file):
             recode_table_f, recode_vars_f)
     pisadat.to_csv(cldata_file, index=False)
 
-def do_logreg(cldata_file, clogstat_file):
+def do_logreg(cldata_file, clogstat_file, regularization=False):
     print "Perform multilevel log reg and save to " + clogstat_file
 
     pisadat = pd.read_csv(cldata_file)
     codes = pisadat.CODE.unique()
-    countries_logstat = lr.calc_countries(pisadat, codes)
-    countries_logstat.to_csv(clogstat_file, index=False)
+    saveto = clogstat_file
+    if regularization:
+        countries_logstat = lr.calc_countries_reg(pisadat, codes)
+        saveto = saveto.split(".")[0] + "_regul" + ".csv"
+    else:
+        countries_logstat = lr.calc_countries(pisadat, codes)
+    countries_logstat.to_csv(saveto, index=False)
+
+
 
 def do_addGDP(cstatfile, cstatfile_new):
     """
@@ -63,7 +70,7 @@ if __name__ == "__main__":
     schoolfile = "../data/pisa_school2012.csv"
 
     cldata_file =  "../data/pisadat_all.csv"
-    clogstat_file = "countries_logreg_stat.csv"
+    clogstat_file = "countries_wlogreg_stat.csv"
 
     cstatfile = "../R/country_stat.csv"
     cstatfile_new = "../R/country_stat_gdp.csv"
@@ -73,6 +80,8 @@ if __name__ == "__main__":
             do_clean(studfile, schoolfile,  cldata_file)
         if arg == "logreg":
             do_logreg(cldata_file, clogstat_file)
+        if arg == "logreg_reg":
+            do_logreg(cldata_file, clogstat_file, regularization=True)
         if arg == "stat":
             print "Run R script to calculate country statistics"
             cmd = ['Rscript', '../R/country_stat.r', '../R']
