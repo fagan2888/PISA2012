@@ -16,9 +16,26 @@
   shape-rendering: crispEdges;
 }
 
+.axis.feature path,
+.axis.feature line {
+  fill: none;
+  display: none;
+  stroke: none;
+}
+
+
 .x.axis path {
   display: none;
 }
+
+.leg-axis path,
+.leg-axis tick,
+.leg-axis line {
+    display: none;
+    fill: none;
+  	stroke: none;
+  }
+
 
 button {
     margin: 0 7px 0 0;
