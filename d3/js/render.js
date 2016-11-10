@@ -1,4 +1,4 @@
-var margin = {top: 20, right: 40, bottom: 170, left: 70},
+var margin = {top: 120, right: 40, bottom: 170, left: 70},
     width = 1100 - margin.left - margin.right,
     height = 700 - margin.top - margin.bottom;
 
@@ -10,8 +10,10 @@ var x = d3.scaleBand()
 var y = d3.scaleLinear()
     .range([height, 0]);
 
+
+var opacityRange = [ 0.3, 0.5, 0.8];
 var z = d3.scaleOrdinal()
-    .range([ 0.3, 0.5, 0.8])
+    .range(opacityRange);
 
 
 var xAxis = d3.axisBottom(x);
@@ -23,6 +25,11 @@ var chart = d3.select(".chart")
   .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+var div = d3.select("body").append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
+
+
 var chb_countries = d3.select(".chb_countries");
 
 
@@ -30,6 +37,14 @@ var alldata = [];
 var data = [];
 var glb_sorting = "median"; //median
 var glb_subject = "MATH";
+
+// Process nav bar
+$(".nav sbj").on("click", function(){
+   $(".nav sbj").find(".active").removeClass("active");
+   $(this).parent().addClass("active");
+});
+
+
 
 d3.csv("data/country_stat_gdp.csv", type, function(error, rows) {
 
@@ -47,7 +62,9 @@ d3.csv("data/country_stat_gdp.csv", type, function(error, rows) {
                     GDP: +d.GDP,
                     median: +d[sbj + "_median_left"],
                     left: +d[id + "_left"],
-                    right: +d[id + "_right"]
+                    right: +d[id + "_right"],
+                    range: (d[sbj + "_interval90_right"] -
+                            d[sbj + "_interval90_left"])/d[sbj + "_interval90_left"]
                   }
                 })
               }
@@ -60,36 +77,13 @@ d3.csv("data/country_stat_gdp.csv", type, function(error, rows) {
 function sorted_data(data,sorting) {
   //! Decide how to implement sorting
 
-  if (sorting == 'cname') {
-
-    data = data.map(function (d) {
-      d.values.sort(function(a,b) {
-         return d3.ascending(a.CNT, b.CNT);
-       });
-       return d;
-    })
-  }
-
-  if (sorting == 'median') {
-    data = data.map(function (d) {
-      d.values.sort(function(a,b) {
-         return d3.ascending(a.median, b.median);
-       });
-       return d;
-    })
-  }
-
-  if (sorting == 'gdp') {
-    data = data.map(function (d) {
-      d.values.sort(function(a,b) {
-         return d3.ascending(a.GDP, b.GDP);
-       });
-       return d;
-    })
-
-
-  }
-  return data
+  data = data.map(function (d) {
+    d.values.sort(function(a,b) {
+       return d3.ascending(a[sorting], b[sorting]);
+     });
+     return d;
+  });
+  return data;
 }
 
 
@@ -180,6 +174,14 @@ function render(subject) {
   chart.selectAll(".label")
     .remove();
 
+  chart.selectAll(".legendWrapper")
+    .remove();
+
+  chart.selectAll(".chartTitle")
+      .remove();
+
+//Set Axis Domain
+
   x.domain(data[0].values
           .map(function(s) { return s.CNT; }));
 
@@ -190,6 +192,11 @@ function render(subject) {
   ]);
 
   z.domain(data.map(function(c) { return c.key; }));
+
+
+//***********************************************************
+//    Add and format bar chart
+//***********************************************************
 
   var series = chart.selectAll(".serie")
       .data(data, function (d) {return d.key;});
@@ -212,11 +219,30 @@ function render(subject) {
             var height = -y(s.right) + y(s.left);
             return (height == 0) ? 1.0 : height;
           })
-      .attr("width", x.bandwidth());
+      .attr("width", x.bandwidth())
+      .on("mouseover", function(s) {
+            div.transition()
+                .duration(200)
+                .style("opacity", .9);
+            div.html(s.CNT + "<br> Score Range [" + Math.ceil(s.left) +
+                    ", " + Math.ceil(s.right) + "]" +
+                  "<br> Median: " + Math.ceil(s.median) +
+                  "<br> Score Gap: " + Math.ceil(100*s.range) + "%")
+                .style("left", (d3.event.pageX) + "px")
+                .style("top", (d3.event.pageY - 28) + "px");
+            })
+      .on("mouseout", function(s) {
+            div.transition()
+                .duration(500)
+                .style("opacity", 0);
+        });
 
   bars.exit().remove();
 
 
+//***********************************************************
+//    Add and format axis and title
+//***********************************************************
 
   chart.append("g")
       .attr("class", "x axis");
@@ -247,10 +273,83 @@ function render(subject) {
     .style("font", "12px sans-serif")
     .text(glb_subject + " Test Score Range");
 
+    //Append title
+  chart.append("text")
+    .attr("class", "chartTitle")
+    .attr("x", width/2)
+    .attr("y", -100)
+    .attr("text-anchor", "middle")
+    .text("Score Ranges for Different Countries");
+
+
+//*********************************************************
+//    Add and format legend
+//*********************************************************
+
+  var legendWidth = width * 0.6,
+      legendHeight = 10;
+
+  var legend = chart.append("g")
+      .attr("class", "legendWrapper")
+      .attr("transform", "translate(10,-35)");
+
+  var rectPos = [
+    {"xpos": 0, "width": legendWidth},
+    {"xpos": legendWidth/4, "width": legendWidth/2},
+    {"xpos": legendWidth/2, "width": 2},
+  ];
+
+  var legendTitles = ["5% quantile", "25% quantile", "median",
+      "75% quantile", "95% quantile"];
+  var legendAreas = ["lower 20% score range", "middle 50% score range",
+        "upper 20% score range"];
+
+  legend.selectAll(".legendRect")
+    .data(rectPos).enter()
+      .append("rect")
+      .attr("class", "legendRect")
+      .attr("x", function (d) {return d.xpos;})
+      .attr("y", -10)
+        //.attr("rx", legendHeight/2)
+      .attr("width", function (d) {return d.width;})
+      .attr("height", legendHeight)
+      .style("fill", "steelblue")
+      .style("opacity", function(d, i) {return opacityRange[i];});
+
+  legend_titles = legend.append("g")
+    .attr("class", "legendTitles")
+    .attr("transform", "translate(0, -20)");
+
+  legend_titles
+    .selectAll(".legend_labels")
+    .data(legendTitles).enter()
+    .append("text")
+    .attr("class", "legend_labels")
+    .attr("x", function (d, i) {return legendWidth * (i/4);})
+    .attr("y", 0)
+    .text(function (d) {return d;})
+    .style("font", "10px sans-serif")
+    .attr("text-anchor", "middle");
+
+    legend_areas = legend.append("g")
+      .attr("class", "legendTitles")
+      .attr("transform", "translate(0, 15)");
+
+    legend_areas
+      .selectAll(".legend_ares")
+      .data(legendAreas).enter()
+      .append("text")
+      .attr("class", "legend_areas")
+      .attr("x", function (d, i) {return legendWidth * ((1+3*i)/8);})
+      .attr("y", 0)
+      .text(function (d) {return d;})
+      .style("font", "10px sans-serif")
+      .attr("text-anchor", "middle");
 
 
 
-    if (glb_sorting == "gdp") {
+
+    if (glb_sorting == "GDP") {
 
       nogdp = function(s) {return ((s.GDP === 0) || (!s.GDP))};
 
@@ -297,8 +396,8 @@ function change(sorting) {
 
     chart.selectAll(".bar")
             .filter(nogdp)
-            .classed("visible", !(glb_sorting == "gdp"))
-            .classed("invisible", (glb_sorting == "gdp"));
+            .classed("visible", !(glb_sorting == "GDP"))
+            .classed("invisible", (glb_sorting == "GDP"));
 
     chart.selectAll(".bar.invisible")
           .style("opacity", 0);
