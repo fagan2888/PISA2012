@@ -1,4 +1,4 @@
-var margin = {top: 20, right: 40, bottom: 170, left: 40},
+var margin = {top: 80, right: 40, bottom: 170, left: 70},
     width = 1100 - margin.left - margin.right,
     height = 700 - margin.top - margin.bottom;
 
@@ -11,8 +11,11 @@ var x = d3.scaleBand()
 var y = d3.scaleLinear()
     .range([height, 0]);
 
+    // colorRange = ["#bcb4d6", "#87a7b4", "#b9d4b3"]; //#E2E797
+
+colorRange = ["#F1BB8F", "#87a7b4", "#b9d4b3"]; //#E2E797
 var z = d3.scaleOrdinal()
-    .range([ "#6b486b", "#a05d56", "#ff8c00"])
+    .range(colorRange);
 
 var stack = d3.stack();
 
@@ -25,7 +28,15 @@ var chart = d3.select(".chart")
   .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+var div = d3.select("body").append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
+
+
 var chb_countries = d3.select(".chb_countries");
+
+legendLabels = ["In All Subjects", "In One or Two, Including Math", "Other"]
+
 
 d3.csv("data/country_lp.csv", type, function(error, data) {
 
@@ -118,7 +129,32 @@ function render(data, stats) {
       .attr("x", function(d) { return x(d.data.CNT); })
       .attr("y", function(d) { return y(d[1]); })
       .attr("height", function(d) { return y(d[0]) - y(d[1]); })
-      .attr("width", x.bandwidth());
+      .attr("width", x.bandwidth())
+      .on("mouseover", function(d, i) {
+            div.transition()
+                .duration(200)
+                .style("opacity", .9);
+            // div.html(d.data.CNT + "<br> % LP in All Subject: " +
+            //   Math.ceil(100*d.data.LPALL_perc) + "%" +
+            //   "<br> % LP in Math: " + Math.ceil(100*d.data.Math) +"%" +
+            //   "<br> % Other LP: " + Math.ceil(100*d.data.Other) + "%")
+            //     .style("left", (d3.event.pageX) + "px")
+            //     .style("top", (d3.event.pageY - 28) + "px");
+            div.html(d.data.CNT +
+              "<br>" + legendLabels[i] + ":" + Math.ceil(100*d[1]) + "%")
+                .style("left", (d3.event.pageX) + "px")
+                .style("top", (d3.event.pageY - 28) + "px");
+            })
+      .on("mouseout", function(s) {
+            div.transition()
+                .duration(500)
+                .style("opacity", 0);
+        });
+
+
+//***********************************************************
+//    Add and format axis and title
+//***********************************************************
 
   chart.append("g")
       .attr("class", "x axis");
@@ -128,7 +164,6 @@ function render(data, stats) {
 
   chart.selectAll(".x.axis")
     .attr("transform", "translate(0," + (height + 10) + ")")
-    // .attr("transform", "translate(0,0)")
     .call(xAxis)
   .selectAll("text")
     .attr("y", 0)
@@ -140,19 +175,42 @@ function render(data, stats) {
   chart.selectAll(".y.axis")
     .attr("transform", "translate(0,0)")
     .call(yAxis);
-    // .append("text")
-    // .attr("x", 40)
-    // .attr("y", width/2)
-    // .style("text-anchor", "middle")
-    // .style("font", "12px sans-serif")
-    // .text("Test Score");
+
+  chart.append("text")
+      .attr("class", "y label")
+      .attr("transform", "rotate(-90)")
+      .attr("x", -height/2)
+      .attr("y", -40)
+      .style("text-anchor", "middle")
+      .style("font", "12px sans-serif")
+      .text("Percent of Students");
+
+      chart.append("text")
+        .attr("class", "chartTitle")
+        .attr("x", width/2)
+        .attr("y", -60)
+        .attr("text-anchor", "middle")
+        .text("Percent of Low Performing Students");
+
+      chart.append("text")
+        .attr("class", "chartsubTitle")
+        .attr("x", width/2)
+        .attr("y", -40)
+        .attr("text-anchor", "middle")
+        .text("(Below Baseline of Proficieny)");
+
+
+
+//***********************************************************
+//    Add and format legend
+//***********************************************************
 
   var legend = chart.selectAll(".legend")
-     .data(data.columns.slice(6).reverse())
+     .data(legendLabels)
      .enter().append("g")
        .attr("class", "legend")
        .attr("transform", function(d, i) { return "translate(0," + (i * 20) + ")"; })
-       .style("font", "10px sans-serif");
+       .style("font", "12px sans-serif");
 
   legend.append("rect")
        .attr("x", width - 18)
@@ -166,6 +224,7 @@ function render(data, stats) {
        .attr("dy", ".35em")
        .attr("text-anchor", "end")
        .text(function(d) { return d; });
+
 
 
 
