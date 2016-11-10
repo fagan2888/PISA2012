@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+
+
+<head>
+  <link rel="stylesheet" type="text/css" href="css/mystyle.css">
+
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+
+</head>
+
+<body>
+
+<div class="container-fluid">
+
+<div class="row">
+  <nav class="navbar navbar-default">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="#">PISA 2012</a>
+      </div>
+    <ul class="nav navbar-nav">
+      <li><a href="index.html">Performance Comparison</a></li>
+      <li><a href="lp.html">Low performance</a></li>
+      <li><a href="lp_analysis.html">Low Performance Analysis</a></li>
+    </ul>
+  </div>
+</nav>
+
+
+</div>
+
+
+<div class="row">
+  <div class="col-sm-9 comment">
+    <p> Achieving high average or median test score among students is important
+      problem for a country. However, it is extremely important not to forget who is left on
+      the bottom line. Decreasing number of low performing students is equally
+      important. <br>
+
+      Percent of student performing low at least in one subject is high and exceeds
+      20% for most countries. Among low performing students nearly a half perform
+      low in all three subjects. Those students who perform low in one or two
+      subjects mostly have difficulties with math.
+</p>
+      <p>
+        Note: To see the data move mouse in the bar, for detailed exploration try
+        country filters on the right panel.
+      </p>
+      <hr>
+  </div>
+</div>
+
+
+<div class="row">
+  <div class="col-sm-9">
+    <svg class="chart"></svg>
+  </div>
+  <div class="col-sm-3">
+    <label> Select countries </label>
+    <div class="chb_countries">
+      <div class="checkbox">
+        <label><input type="checkbox" class="chbox_all" value=""  onClick="toggle(this)">
+          Select All</label>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+
+
+<script src="//d3js.org/d3.v4.min.js" charset="utf-8"></script>
+<!-- <script src="//d3js.org/d3.v3.min.js" charset="utf-8"></script> -->
+<script src="js/lperf.js" charset="utf-8"></script>
+
+
+</body>
+</html>
