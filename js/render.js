@@ -1,4 +1,4 @@
-var margin = {top: 120, right: 40, bottom: 170, left: 70},
+var margin = {top: 140, right: 40, bottom: 170, left: 70},
     width = 1100 - margin.left - margin.right,
     height = 700 - margin.top - margin.bottom;
 
@@ -204,7 +204,8 @@ function render(subject) {
   var series_enter = series.enter().append("g")
     .attr("class", function(d) {return "serie " + d.key})
     .attr("fill", "steelblue")
-    .attr("opacity", function(d) { return z(d.key); });
+    // .attr("opacity", function(d) { return z(d.key); });
+    .attr("opacity", 0);
 
   series.exit().remove();
 
@@ -224,7 +225,7 @@ function render(subject) {
             div.transition()
                 .duration(200)
                 .style("opacity", .9);
-            div.html(s.CNT + "<br> Score Range [" + Math.ceil(s.left) +
+            div.html("<b>" + s.CNT + "</b>" + "<br> Score Range [" + Math.ceil(s.left) +
                     ", " + Math.ceil(s.right) + "]" +
                   "<br> Median: " + Math.ceil(s.median) +
                   "<br> Score Gap: " + Math.ceil(100*s.range) + "%")
@@ -236,6 +237,10 @@ function render(subject) {
                 .duration(500)
                 .style("opacity", 0);
         });
+
+  series_enter.transition().duration(1000)
+          .style("opacity", function(d) { return z(d.key); } );
+
 
   bars.exit().remove();
 
@@ -271,13 +276,13 @@ function render(subject) {
     .attr("y", -40)
     .style("text-anchor", "middle")
     .style("font", "12px sans-serif")
-    .text(glb_subject + " Test Score Range");
+    .text(glb_subject + " Test Score");
 
     //Append title
   chart.append("text")
     .attr("class", "chartTitle")
     .attr("x", width/2)
-    .attr("y", -100)
+    .attr("y", -110)
     .attr("text-anchor", "middle")
     .text("Score Ranges for Different Countries");
 

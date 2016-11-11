@@ -24,8 +24,8 @@
       </div>
     <ul class="nav navbar-nav">
       <li><a href="index.html">Performance Comparison</a></li>
-      <li><a href="lp.html">Low performance</a></li>
-      <li><a href="lp_analysis.html">Low Performance Analysis</a></li>
+      <li><a href="lp.html">Low Performance</a></li>
+      <li><a href="lp_analysis.html">Low Performance Likelihood</a></li>
     </ul>
   </div>
 </nav>
@@ -33,27 +33,44 @@
 
 </div>
 
-<div class="row">
+<!-- <div class="row">
 
   <ul class="nav nav-tabs">
     <li><a href="#" onClick=""> Math</a></li>
     <li><a href="#" onClick=""> Reading</a></li>
     <li><a href="#" onClick=""> Science</a></li>
   </ul>
+</div> -->
+
+<div class="row">
+  <div class="col-sm-9">
+      <h3 class="page-title">Low Performance Likelihood</h3>
+      <hr>
+</div>
 </div>
 
 <div class="row">
   <div class="col-sm-9 comment">
-    <p> Who has the risk to become a low performer? Does, for example,
-      income or immigration background matters? <br>
-      Further analysis based on weighted logistic regression considers
-      influence of some potential risk factors in different countries.
-      Values in a heatmap correspond to logistic coefficient and represent
-      potential change in logarithm of odd ratio between group of low performers
-      and others. Note that positive sign means increase in probability to
-      become a low performer.
+    <p>Who has the risk to become a low performer?<br>
+      Does social status or immigrant background matter? <br>
+    </p>
+    <p>
+      Further analysis based on logistic regression analysis considers influence
+      of some potential risk factors in different countries.
       </p>
   </div>
+</div>
+
+<div class="row">
+  <div class="col-sm-9">
+    <a class="btn btn-default right-btn" href="lp.html"> Previous</a>
+</div>
+</div>
+
+<div class="row">
+  <div class="col-sm-9">
+    <hr>
+</div>
 </div>
 
 
@@ -69,13 +86,22 @@
 </div>
 
 <div class="row">
-  <div class="col-sm-9">
-    <p> Considered factors make the following comparisons: GENDER: “Female” vs “Male”,
-    PRIMED: “No primary education” vs “At least one year of primary education”,
-    ESCS_GR: “Disadvantaged social and economic status” vs “Medium and advantaged
-    social and economic status”, FAMSTRUC: “Single parent family” vs “Two parent family”,
-    IMMIG: “Immigrant” vs “Native”, SCHTYPE: “Public” vs “Private”, SCHLOC: “Rural”
-      vs “Urban”, DIFFLNG: “Speak different language” vs “Speak the same language”.
+  <div class="col-sm-9 comment">
+    <p> Notes:<br>
+      Values in the heatmap correspond to coefficients of multivariate logistic
+      regression. Low performance status (binary variable, 1 – student is low
+      performer, 0 – otherwise) is regressed one a set of risk factors (categorical
+      variables with two levels). <br>
+      Positive coefficient value means that a factor has negative effect and
+      increase the likelihood of low performance in Math; negative value means
+      positive effect and decrease of likelihood of low performance in Math.
+    </p>
+    <p>
+      Social and economical status is based on the PISA index of economic,
+      social and cultural status. Disadvantaged status is defined as a status
+      with the index below 25% quintile, threshold is defined separately for
+      each country.
+
   </p>
   </div>
 </div>

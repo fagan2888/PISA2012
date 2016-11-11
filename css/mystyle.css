@@ -7,6 +7,7 @@
 
 .axis text {
   font: 12px sans-serif;
+  fill: #4F4F4F;
 }
 
 .axis path,
@@ -37,7 +38,7 @@
   }
 
 
-button {
+/*button {
     margin: 0 7px 0 0;
     background-color: #f5f5f5;
     border: 1px solid #dedede;
@@ -50,11 +51,11 @@ button {
     font-weight: bold;
     color: #565656;
     cursor: pointer;
-}
+}*/
 
 .comment
 {
-    margin: 10px 10px 10px 10px;
+    margin: 0px 10px 10px 10px;
 }
 
 .container
@@ -97,8 +98,8 @@ div.sorting {
 
 div.tooltip {
     position: absolute;
-    text-align: center;
-    width: 150px;
+    text-align: start;
+    width: 160px;
     height: 70px;
     padding: 2px;
     font: 12px sans-serif;
@@ -106,4 +107,54 @@ div.tooltip {
     border: 0px;
     border-radius: 8px;
     pointer-events: none;
+}
+
+/*.chartTitle {
+  font-family: Georgia, serif;
+
+}*/
+
+
+.chartTitle {
+	      font-size: 2.3rem;
+	      fill: #4F4F4F;
+	      font-weight: 300;
+	      text-anchor: middle;
+        font-family: Georgia, serif;
+	    }
+
+.chartsubTitle {
+  font-size: 1.3rem;
+  fill: #AAAAAA;
+  font-weight: 300;
+  text-anchor: middle;
+  font-family: Georgia, serif;
+}
+
+.country.label {
+  font-family: Georgia, serif;
+  fill: #4F4F4F;
+  font-size: 1.8rem;
+  font-weight: 300;
+  text-anchor: middle;
+}
+
+.axisTitle {
+  font-family: Georgia, serif;
+  fill: #AAAAAA;
+  font-weight: 300;
+  font-size: 1.3rem;
+}
+
+.legendTitle {
+  fill: #AAAAAA;
+}
+
+.right-btn {
+    float: right;
+}
+
+.page-title {
+  margin: 10px 0px 15px 10px;
+  font-family: Georgia, serif;
 }

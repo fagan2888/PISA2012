@@ -20,7 +20,9 @@ var z = d3.scaleOrdinal()
 var stack = d3.stack();
 
 var xAxis = d3.axisBottom(x);
-var yAxis = d3.axisLeft(y);
+var yAxis = d3.axisLeft(y)
+  .tickFormat(function(d) { return Math.floor(100*d) + "%"; });
+
 
 var chart = d3.select(".chart")
     .attr("width", width + margin.left + margin.right)
@@ -117,12 +119,14 @@ function render(data, stats) {
   y.domain([0, d3.max(data, function(d) { return d.LPANY_perc; })]).nice();
   z.domain(stats.map(function(c) { return c.id; }));
 
-  chart.selectAll(".serie")
-    .data(stats)
-    .enter().append("g")
-      .attr("class", "serie")
-      .attr("fill", function(d) { return z(d.key); })
-    .selectAll(".rect")
+  var series_enter = chart.selectAll(".serie")
+    .data(stats).enter()
+    .append("g")
+    .attr("class", "serie")
+    .attr("fill", function(d) { return z(d.key); })
+    .style("opacity", 0);
+
+  series_enter.selectAll(".rect")
       .data(function(d) { return d; })
       .enter().append("rect")
       .attr("class", function(d) { return "bar " + clname(d.data.CNT); })
@@ -130,18 +134,20 @@ function render(data, stats) {
       .attr("y", function(d) { return y(d[1]); })
       .attr("height", function(d) { return y(d[0]) - y(d[1]); })
       .attr("width", x.bandwidth())
-      .on("mouseover", function(d, i) {
+      .on("mouseover", function(d) {
+            var headers = {
+              "Other" : "Other",
+              "LPALL_perc" : "All subjects",
+               "Math" : "One or Two, incl Math"
+            };
             div.transition()
                 .duration(200)
                 .style("opacity", .9);
-            // div.html(d.data.CNT + "<br> % LP in All Subject: " +
-            //   Math.ceil(100*d.data.LPALL_perc) + "%" +
-            //   "<br> % LP in Math: " + Math.ceil(100*d.data.Math) +"%" +
-            //   "<br> % Other LP: " + Math.ceil(100*d.data.Other) + "%")
-            //     .style("left", (d3.event.pageX) + "px")
-            //     .style("top", (d3.event.pageY - 28) + "px");
-            div.html(d.data.CNT +
-              "<br>" + legendLabels[i] + ":" + Math.ceil(100*d[1]) + "%")
+            var key = this.parentElement.__data__.key;
+            div.html("<b>" + d.data.CNT + "</b>" +
+              "<br> Percent of Low Performers:" +
+              "<br> At least in one subject: " + Math.ceil(100*d.data.LPANY_perc) + "%" +
+              "<br>" + headers[key] + ": " + Math.ceil(100*d.data[key]) + "%")
                 .style("left", (d3.event.pageX) + "px")
                 .style("top", (d3.event.pageY - 28) + "px");
             })
@@ -151,9 +157,13 @@ function render(data, stats) {
                 .style("opacity", 0);
         });
 
+        series_enter.transition().duration(1000)
+            .style("opacity", 1);
+
+
 
 //***********************************************************
-//    Add and format axis and title
+//    Add and format axis
 //***********************************************************
 
   chart.append("g")
@@ -184,6 +194,10 @@ function render(data, stats) {
       .style("text-anchor", "middle")
       .style("font", "12px sans-serif")
       .text("Percent of Students");
+
+//***********************************************************
+//    Add and format title
+//***********************************************************
 
       chart.append("text")
         .attr("class", "chartTitle")

@@ -1,10 +1,10 @@
-var margin = {top: 60, right: 90, bottom: 170, left: 40},
+var margin = {top: 140, right: 120, bottom: 170, left: 40},
     width = 1100 - margin.left - margin.right,
-    height = 400 - margin.top - margin.bottom;
+    height = 600 - margin.top - margin.bottom;
 
-var right_margin = {top: 60, right: 15, bottom: 170, left: 20},
-    right_width = 300 - margin.left - margin.right,
-    right_height = 400 - margin.top - margin.bottom;
+var right_margin = {top: margin.top, right: 15, bottom: 170, left: 20},
+    right_width = 200 - right_margin.left - right_margin.right,
+    right_height = 600 - right_margin.top - right_margin.bottom;
 
 
 var x = d3.scaleBand()
@@ -42,7 +42,19 @@ var right_chart = d3.select(".chart.right")
 var data = [];
 var country_data = {};
 var aggregdata = [];
-//var bars;
+
+var feature_names = {
+  "DIFFLNG" : "Different Native Language",
+  "SCHLOC" : "Rural School Location",
+  "SCHTYPE" : "Public School",
+  "IMMIG": "Immigrant Background",
+  "FAMSTRUC" : "Single Parent Family",
+  "ESCS_GR" : "Disadv Social and Economic Status",
+  "PRIMED" : "No Pre-Primary Education",
+  "GENDER" : "Female Gender"
+
+};
+
 
 
 d3.csv("data/countries_stat_longreg.csv", type, function(error, rows) {
@@ -85,17 +97,22 @@ d3.csv("data/countries_stat_longreg.csv", type, function(error, rows) {
   })
 
 
+
   x.domain(countries);
-  y.domain(features);
+  y.domain(features.map(function (f) {return feature_names[f];}));
 
   render(data, features, countries);
-  render_right(aggregdata, "All_countries");
+  render_right(aggregdata, "All Countries");
 
 });
 
+
 function render (data) {
+//Draw main part of the chart
 
-
+//**********************************************************
+//   Add and format axis
+//**********************************************************
 
   var z = d3.scaleLinear()
       .domain([d3.min(data, function (d) {return d.value}), 0.0,
@@ -119,8 +136,15 @@ function render (data) {
           .style("text-anchor", "end");
 
   chart.selectAll(".y.axis.feature")
-        .attr("transform", "translate(" + width + ",0)")
-        .call(yAxis);
+        .attr("transform", "translate(" + (width+5) + ",0)")
+        .call(yAxis)
+      .selectAll(".tick text")
+      .call(wrap, margin.right-15);
+
+//**********************************************************
+//   Add Heatmap
+//**********************************************************
+
 
   var cardWidth = Math.floor(width / countries.length);
   var cardHeight = Math.floor(height / features.length);
@@ -129,22 +153,23 @@ function render (data) {
           .data(data)
         .enter().append("rect")
           .attr("x", function(d) { return x(d.CNT);})
-          .attr("y", function(d) { return y(d.feature); })
+          .attr("y", function(d) { return y(feature_names[d.feature]); })
           .attr("rx", 4)
           .attr("ry", 4)
           .attr("class", "card bordered")
           .attr("width", cardWidth)
           .attr("height", cardHeight)
-          // .style("fill", function (d) {return z(d.value)});
           .style("fill", "white")
           .on("mouseover", mover);
-	        // .on("mouseout", mout);
 
     cards.transition().duration(1000)
             .style("fill", function(d) { return z(d.value); });
 
+//**********************************************************
+//   Add and format legend
+//**********************************************************
 
-    var defs = chart.append("defs");
+   var defs = chart.append("defs");
 
    defs.append("linearGradient")
     	.attr("id", "gradient-colors")
@@ -164,75 +189,105 @@ function render (data) {
         .attr("class", "legendWrapper")
         .attr("transform", "translate(10,-30)");
 
-          //Draw the Rectangle
+    //Draw the Rectangle
     legend.append("rect")
     	  .attr("class", "legendRect")
     	  .attr("x", 10)
     	  .attr("y", -10)
-    	    //.attr("rx", legendHeight/2)
     	  .attr("width", legendWidth)
     	  .attr("height", legendHeight)
     	  .style("fill", "url(#gradient-colors)");
 
-    // legend.transition().duration(1000)
-    //     .style("fill", "url(#gradient-colors)");
-
-
-    //Append title
     legend.append("text")
   	  .attr("class", "legendTitle")
-  	  .attr("x", 10)
+  	  .attr("x", 0)
   	  .attr("y", -15)
-  	  .text("Score");
+  	  .text("Positive Effect")
+      .style("text-anchor", "start")
 
- //Set scale for x-axis
-  var xScaleLegend = d3.scaleLinear()
-  	   .range([0, legendWidth/2, legendWidth])
-  	   .domain([d3.min(data, function (d) {return d.value;}), 0,
-                d3.max(data, function (d) {return d.value;})]);
-  	 //.domain([d3.min(pt.legendSOM.colorData)/100, d3.max(pt.legendSOM.colorData)/100]);
 
-  //Define x-axis
-  var xAxisLegend = d3.axisBottom(xScaleLegend)
-  	  .ticks(8)  //Set rough # of ticks
-  	  //.tickFormat(formatPercent)
+    legend.append("text")
+  	  .attr("class", "legendTitle")
+  	  .attr("x", legendWidth + 20)
+  	  .attr("y", -15)
+  	  .text("Negative Effect")
+      .style("text-anchor", "end");
 
-  //Set up X axis
-  legend.append("g")
-  	.attr("class", "leg-axis")  //Assign "axis" class
-  	.attr("transform", "translate(10, 0)")
-  	.call(xAxisLegend);
+    //Add x-axis and add legend labels
+    var xScaleLegend = d3.scaleLinear()
+    	   .range([0, legendWidth/2, legendWidth])
+    	   .domain([d3.min(data, function (d) {return d.value;}), 0,
+                  d3.max(data, function (d) {return d.value;})]);
+
+    var xAxisLegend = d3.axisBottom(xScaleLegend)
+  	  .ticks(8);  //Set rough # of ticks
+
+    legend.append("g")
+    	.attr("class", "leg-axis")  //Assign "axis" class
+    	.attr("transform", "translate(10, 0)")
+    	.call(xAxisLegend);
+
+//**********************************************************
+//   Add and format title
+//**********************************************************
+
+    chart.append("text")
+    .attr("class", "axisTitle")
+    .attr("x", width + 5)
+    .attr("y", 0)
+    .attr("text-anchor", "start")
+    .text("Risk Factor")
+    .style("font-style", "italic");
+
+
+    chart.append("text")
+    .attr("class", "chartTitle")
+    .attr("x", width/2)
+    .attr("y", -120)
+    .attr("text-anchor", "middle")
+    .text("Influence of Different Factors on Likelihood of Low Performance in Math");
+
+    chart.append("text")
+      .attr("class", "chartsubTitle")
+      .attr("x", width/2)
+      .attr("y", -100)
+      .attr("text-anchor", "middle")
+      .text("(Based on Multivariate Logistic Regression)");
+
 
 }
 
 function mover(d) {
+//Action on mouse move in a heatmap rectangle
   var country = d.CNT;
-  render_right(country_data[country], country)
-
+  render_right(country_data[country], country, d.feature)
 }
 
 function mout(d) {
-  render_right(aggregdata, "All_countries")
+//Action on mouse move out from the heatmap area
+  render_right(aggregdata, "All Countries")
 }
 
-function render_right(aggdata, country) {
+function render_right(aggdata, country, feature) {
+//Draw right panel of the chart
+
   var x_right = d3.scaleLinear()
       .range([0, right_width])
       .domain([
           Math.min(0, d3.min(aggdata, function (d) {return d.value;})),
           d3.max(aggdata, function (d) {return d.value;})
         ])
-
-      .nice();
+        .nice();
 
   var rbars = right_chart.selectAll(".bars")
     .data(aggdata, function (d) {return d.key + ":" + clname(d.country) });
 
 
   rbars.enter().append("rect")
-    .attr("class", function (d) { return "bars right " + clname(d.country);} )
+    .attr("class", function (d) { return "bars right " + clname(d.country) +
+            " " + d.key;} )
     .attr("x", function (d) {return x_right(Math.min(0, d.value));})
-    .attr("y", function (d) {return y(d.key);})
+    .attr("y", function (d) {return y(feature_names[d.key]);})
     .attr("width", function (d) {
           return x_right(Math.abs(d.value)) - x_right(0) ;
         })
@@ -240,19 +295,22 @@ function render_right(aggdata, country) {
     .style("fill", "grey")
     .style("opacity", 0.3);
 
+  if (feature)
+    right_chart.selectAll(".bars." + feature)
+      .style("opacity", 0.8);
+
+
   rbars.exit().remove();
 
 
 
-  right_chart.selectAll(".right.label")
+  right_chart.selectAll(".country.label")
       .remove();
 
   right_chart.append("text")
-    .attr("class", "right label")
+    .attr("class", "country label")
     .attr("x", right_width/2)
     .attr("y", -10)
-    .style("text-anchor", "middle")
-    .style("font", "13px sans-serif")
     .text(country);
 
     right_chart.selectAll(".axis.right")
@@ -263,12 +321,34 @@ function render_right(aggdata, country) {
 
     right_chart.selectAll(".x.axis.right")
        .attr("transform", "translate(0," + (right_height + 10) + ")")
-   .call(d3.axisBottom(x_right));
-
-
-
+   .call(d3.axisBottom(x_right).ticks(6));
 
 }
+
+function wrap(text, width) {
+  text.each(function() {
+    var text = d3.select(this),
+        words = text.text().split(/\s+/).reverse(),
+        word,
+        line = [],
+        lineNumber = 0,
+        lineHeight = 1.1, // ems
+        y = text.attr("y"),
+        dy = parseFloat(text.attr("dy")),
+        tspan = text.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", dy + "em");
+    while (word = words.pop()) {
+      line.push(word);
+      tspan.text(line.join(" "));
+      if (tspan.node().getComputedTextLength() > width) {
+        line.pop();
+        tspan.text(line.join(" "));
+        line = [word];
+        tspan = text.append("tspan").attr("x", 0).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+      }
+    }
+  });
+}
+
 
 
 function clname(name) {
