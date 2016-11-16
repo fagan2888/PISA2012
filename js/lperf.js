@@ -1,5 +1,5 @@
-var margin = {top: 80, right: 40, bottom: 170, left: 70},
-    width = 1100 - margin.left - margin.right,
+var margin = {top: 80, right: 20, bottom: 170, left: 70},
+    width = 1050 - margin.left - margin.right,
     height = 700 - margin.top - margin.bottom;
 
 var x = d3.scaleBand()
@@ -11,8 +11,6 @@ var x = d3.scaleBand()
 var y = d3.scaleLinear()
     .range([height, 0]);
 
-    // colorRange = ["#bcb4d6", "#87a7b4", "#b9d4b3"]; //#E2E797
-
 colorRange = ["#F1BB8F", "#87a7b4", "#b9d4b3"]; //#E2E797
 var z = d3.scaleOrdinal()
     .range(colorRange);
@@ -23,7 +21,6 @@ var xAxis = d3.axisBottom(x);
 var yAxis = d3.axisLeft(y)
   .tickFormat(function(d) { return Math.floor(100*d) + "%"; });
 
-
 var chart = d3.select(".chart")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
@@ -33,7 +30,6 @@ var chart = d3.select(".chart")
 var div = d3.select("body").append("div")
     .attr("class", "tooltip")
     .style("opacity", 0);
-
 
 var chb_countries = d3.select(".chb_countries");
 
@@ -51,69 +47,10 @@ d3.csv("data/country_lp.csv", type, function(error, data) {
 
 });
 
-checked = []
-
-function update() {
-
-  chart.selectAll(".bar")
-    .style("opacity", 0.3);
-
-  checkboxes = document.getElementsByClassName('chbox');
-  for(var i=0, n=checkboxes.length;i<n;i++) {
-    if (checkboxes[i].checked) {
-      chart.selectAll("." + checkboxes[i].value)
-        .style("opacity", 1);
-    }
-  }
-}
-
-function toggle(source) {
-  checkboxes = document.getElementsByClassName('chbox');
-  for(var i=0, n=checkboxes.length;i<n;i++) {
-    checkboxes[i].checked = source.checked;
-  }
-
-  update();
-
-}
-
-function clname(name) {
-  return name.replace(/\s/g,"_")
-          .replace("(","")
-          .replace(")","");
-}
-
-function add_chbox(data) {
-
-  data.sort(function(a,b) {
-     return d3.ascending(a.CNT, b.CNT)});
-
-  chb_countries.selectAll(".chbox_all")
-    .attr("checked", true);
-
-
-  items = chb_countries.selectAll(".checkbox.chb_country")
-    .data(data)
-    .enter()
-    .append("div")
-    .attr("class", "checkbox chb_country")
-    .append("label")
-    .attr("class", "chb_label")
-    .append("input")
-    .attr("class", "chbox")
-    .attr("type" ,"checkbox")
-    .attr("value", function(d) {return clname(d.CNT);})
-    .attr("checked", true)
-    .on("click", update);
-
-  chb_countries.selectAll(".chb_label")
-    .append("text")
-    .text(function(d) {return d.CNT;})
-
-}
-
-
 function render(data, stats) {
+/*
+Draw main chart
+*/
 
   x.domain(data.map(function(d) { return d["CNT"]; }));
   y.domain([0, d3.max(data, function(d) { return d.LPANY_perc; })]).nice();
@@ -135,19 +72,16 @@ function render(data, stats) {
       .attr("height", function(d) { return y(d[0]) - y(d[1]); })
       .attr("width", x.bandwidth())
       .on("mouseover", function(d) {
-            var headers = {
-              "Other" : "Other",
-              "LPALL_perc" : "All subjects",
-               "Math" : "One or Two, incl Math"
-            };
             div.transition()
                 .duration(200)
                 .style("opacity", .9);
             var key = this.parentElement.__data__.key;
             div.html("<b>" + d.data.CNT + "</b>" +
-              "<br> Percent of Low Performers:" +
+              "<br><i> Percent of Low Performers:</i>" +
               "<br> At least in one subject: " + Math.ceil(100*d.data.LPANY_perc) + "%" +
-              "<br>" + headers[key] + ": " + Math.ceil(100*d.data[key]) + "%")
+              "<br> In all subject: " + Math.ceil(100*d.data.LPALL_perc) + "%" +
+              "<br> In One or Two, incl Math: " + Math.ceil(100*d.data.Math) + "%" +
+              "<br> Other: " + Math.ceil(100*d.data.Other) + "%")
                 .style("left", (d3.event.pageX) + "px")
                 .style("top", (d3.event.pageY - 28) + "px");
             })
@@ -161,6 +95,49 @@ function render(data, stats) {
             .style("opacity", 1);
 
 
+//***********************************************************
+//    Add horizontal line
+//***********************************************************
+    var num = d3.sum(data, function (s) {
+            if (s.LPANY_perc>0.25) {
+              return 1;
+            } else {
+              return 0;
+            } });
+
+    var perc = num/data.length;
+
+    chart.append("line")
+      .attr("class", "median-line")
+      .attr("x1", 0)
+      .attr("x2", width*perc)
+      .attr("y1", y(0.25))
+      .attr("y2", y(0.25))
+      .attr("stroke-width", 2)
+      .attr("stroke", "#9E0142")
+      .style("opacity", 0.6)
+      .style("stroke-dasharray", ("5, 3"));
+
+    comment = ["In " + num + " countries one from ",
+              "four students is low performer",
+              "at least in one subject", "(more than 25% low performers)"];
+    chart.selectAll(".chartComment.Second")
+      .data(comment).enter()
+    .append("text")
+      .attr("class", "chartComment Second")
+      .attr("x", width*perc)
+      .attr("y", function(d,i) {return y(0.4) + i*15;})
+      .text(function(d) {return d;});
+
+    comment1 = ["Percent of students performing", "low at least in one subject",
+            "varies from 5% to 82%"];
+   chart.selectAll(".chartComment.First")
+        .data(comment1).enter()
+      .append("text")
+        .attr("class", "chartComment First")
+        .attr("x", width/4)
+        .attr("y", function(d,i) {return y(0.75) + i*15;})
+        .text(function(d) {return d;});
 
 //***********************************************************
 //    Add and format axis
@@ -213,8 +190,6 @@ function render(data, stats) {
         .attr("text-anchor", "middle")
         .text("(Below Baseline of Proficieny)");
 
-
-
 //***********************************************************
 //    Add and format legend
 //***********************************************************
@@ -239,11 +214,109 @@ function render(data, stats) {
        .attr("text-anchor", "end")
        .text(function(d) { return d; });
 
+}
+
+//***********************************************************
+//    Country Selector functions
+//***********************************************************
+
+function add_chbox(data) {
+/*
+Adds country selector
+*/
+
+  data.sort(function(a,b) {
+     return d3.ascending(a.CNT, b.CNT)});
+
+  chb_countries.selectAll(".chbox_all")
+    .attr("checked", true);
 
 
+  items = chb_countries.selectAll(".checkbox.chb_country")
+    .data(data)
+    .enter()
+    .append("div")
+    .attr("class", "checkbox chb_country")
+    .append("label")
+    .attr("class", "chb_label")
+    .append("input")
+    .attr("class", "chbox")
+    .attr("type" ,"checkbox")
+    .attr("value", function(d) {return clname(d.CNT);})
+    .attr("checked", true)
+    .on("click", update);
 
+  chb_countries.selectAll(".chb_label")
+    .append("text")
+    .text(function(d) {return d.CNT;})
 
 }
+
+function update() {
+/*
+Apply country selector
+*/
+
+  chart.selectAll(".bar")
+    .style("opacity", 0.3);
+
+  checkboxes = document.getElementsByClassName('chbox');
+  for(var i=0, n=checkboxes.length;i<n;i++) {
+    if (checkboxes[i].checked) {
+      chart.selectAll("." + checkboxes[i].value)
+        .style("opacity", 1);
+    }
+  }
+}
+
+function toggle(source) {
+  checkboxes = document.getElementsByClassName('chbox');
+  for(var i=0, n=checkboxes.length;i<n;i++) {
+    checkboxes[i].checked = source.checked;
+  }
+
+  update();
+
+}
+
+//***********************************************************
+//    Helper functions
+//***********************************************************
+
+function clname(name) {
+  return name.replace(/\s/g,"_")
+          .replace("(","")
+          .replace(")","");
+}
+
+function shortCName(name) {
+  new_name = name;
+  switch(name) {
+    case "United Arab Emirates":
+      new_name = "UAE";
+      break;
+    case "United States of America":
+      new_name = "USA";
+      break;
+    case "Russian Federation":
+      new_name = "Russia";
+      break;
+    case "Perm(Russian Federation)":
+      new_name = "Perm(RF)";
+      break;
+    case "Connecticut (USA)":
+      new_name = "Connecticut";
+      break;
+    case "Massachusetts (USA)":
+      new_name = "Massachusetts";
+      break;
+    case "Hong Kong-China":
+      new_name = "Hong Kong";
+      break;
+  }
+  return new_name;
+}
+
 
 
 function type(d) {
@@ -254,6 +327,8 @@ function type(d) {
   d["LPALL_perc"] = +d["LPALL_perc"];
   d["Math"] = +d["Math"];
   d["Other"] = +d["Other"];
+
+  d["CNT"] = shortCName(d["CNT"]);
 
   return d;
 }

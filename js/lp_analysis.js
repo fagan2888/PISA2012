@@ -1,8 +1,8 @@
-var margin = {top: 140, right: 120, bottom: 170, left: 40},
-    width = 1100 - margin.left - margin.right,
+var margin = {top: 140, right: 100, bottom: 170, left: 20},
+    width = 1050 - margin.left - margin.right,
     height = 600 - margin.top - margin.bottom;
 
-var right_margin = {top: margin.top, right: 15, bottom: 170, left: 20},
+var right_margin = {top: margin.top, right: 15, bottom: 170, left: 10},
     right_width = 200 - right_margin.left - right_margin.right,
     right_height = 600 - right_margin.top - right_margin.bottom;
 
@@ -16,7 +16,7 @@ var y = d3.scaleBand()
     .range([height, 0])
     .padding(0.1);
 
-var colors = ["steelblue", "white", "green"];
+var colors = ["#9E0142", "white", "#2b842b"];
 
 var xAxis = d3.axisBottom(x);
 var yAxis = d3.axisRight(y);
@@ -29,7 +29,9 @@ var chart = d3.select(".chart.main")
 
 var heatmap = chart.append("g")
           .attr("class", "heatmap")
-          .on("mouseout", mout);
+          .on("mouseout", function (d) {
+            render_right(aggregdata, "All Countries");
+          });
 
 var right_chart = d3.select(".chart.right")
   .attr("width", right_width + right_margin.left + right_margin.right)
@@ -52,9 +54,7 @@ var feature_names = {
   "ESCS_GR" : "Disadv Social and Economic Status",
   "PRIMED" : "No Pre-Primary Education",
   "GENDER" : "Female Gender"
-
 };
-
 
 
 d3.csv("data/countries_stat_longreg.csv", type, function(error, rows) {
@@ -69,7 +69,7 @@ d3.csv("data/countries_stat_longreg.csv", type, function(error, rows) {
                         .map(function (c) {
                           return {
                             key: c,
-                            value: d[c],
+                            value: +d[c],
                             country: d.CNT
                           };
                         });
@@ -108,7 +108,7 @@ d3.csv("data/countries_stat_longreg.csv", type, function(error, rows) {
 
 
 function render (data) {
-//Draw main part of the chart
+//Draw main chart
 
 //**********************************************************
 //   Add and format axis
@@ -126,7 +126,7 @@ function render (data) {
           .attr("class", "y axis feature");
 
   chart.selectAll(".x.axis")
-          .attr("transform", "translate(0," + (height + 10) + ")")
+          .attr("transform", "translate(0," + (height + 15) + ")")
           .call(xAxis)
         .selectAll("text")
           .attr("y", 0)
@@ -139,7 +139,7 @@ function render (data) {
         .attr("transform", "translate(" + (width+5) + ",0)")
         .call(yAxis)
       .selectAll(".tick text")
-      .call(wrap, margin.right-15);
+      .call(wrap, margin.right);
 
 //**********************************************************
 //   Add Heatmap
@@ -160,7 +160,9 @@ function render (data) {
           .attr("width", cardWidth)
           .attr("height", cardHeight)
           .style("fill", "white")
-          .on("mouseover", mover);
+          .on("mouseover", function (d) {
+            render_right(country_data[d.CNT], d.CNT, d.feature);
+          });
 
     cards.transition().duration(1000)
             .style("fill", function(d) { return z(d.value); });
@@ -257,19 +259,10 @@ function render (data) {
 
 }
 
-function mover(d) {
-//Action on mouse move in a heatmap rectangle
-  var country = d.CNT;
-  render_right(country_data[country], country, d.feature)
-}
-
-function mout(d) {
-//Action on mouse move out from the heatmap area
-  render_right(aggregdata, "All Countries")
-}
-
 function render_right(aggdata, country, feature) {
-//Draw right panel of the chart
+/*
+Draw right panel with dynamic bar chart
+*/
 
   var x_right = d3.scaleLinear()
       .range([0, right_width])
@@ -277,7 +270,8 @@ function render_right(aggdata, country, feature) {
           Math.min(0, d3.min(aggdata, function (d) {return d.value;})),
           d3.max(aggdata, function (d) {return d.value;})
         ])
-        .nice();
+      .nice();
+
 
   var rbars = right_chart.selectAll(".bars")
     .data(aggdata, function (d) {return d.key + ":" + clname(d.country) });
@@ -299,10 +293,7 @@ function render_right(aggdata, country, feature) {
     right_chart.selectAll(".bars." + feature)
       .style("opacity", 0.8);
 
-
   rbars.exit().remove();
-
-
 
   right_chart.selectAll(".country.label")
       .remove();
@@ -313,19 +304,26 @@ function render_right(aggdata, country, feature) {
     .attr("y", -10)
     .text(country);
 
-    right_chart.selectAll(".axis.right")
-        .remove();
+  right_chart.selectAll(".axis.right")
+      .remove();
 
-    right_chart.append("g")
-       .attr("class", "x axis right");
+  right_chart.append("g")
+     .attr("class", "axis right");
 
-    right_chart.selectAll(".x.axis.right")
-       .attr("transform", "translate(0," + (right_height + 10) + ")")
-   .call(d3.axisBottom(x_right).ticks(6));
+  right_chart.selectAll(".axis.right")
+     .attr("transform", "translate(0," + (right_height + 10) + ")")
+     .call(d3.axisBottom(x_right).ticks(6));
 
 }
 
+//**********************************************************
+//   Helper functions
+//**********************************************************
+
 function wrap(text, width) {
+/*
+Allow to make multiline tick labels for axis
+*/
   text.each(function() {
     var text = d3.select(this),
         words = text.text().split(/\s+/).reverse(),
@@ -350,13 +348,43 @@ function wrap(text, width) {
 }
 
 
-
 function clname(name) {
   return name.replace(/\s/g,"_")
           .replace("(","")
           .replace(")","");
 }
 
+function shortCName(name) {
+  new_name = name;
+  switch(name) {
+    case "United Arab Emirates":
+      new_name = "UAE";
+      break;
+    case "United States of America":
+      new_name = "USA";
+      break;
+    case "Russian Federation":
+      new_name = "Russia";
+      break;
+    case "Perm(Russian Federation)":
+      new_name = "Perm(RF)";
+      break;
+    case "Connecticut (USA)":
+      new_name = "Connecticut";
+      break;
+    case "Massachusetts (USA)":
+      new_name = "Massachusetts";
+      break;
+    case "Hong Kong-China":
+      new_name = "Hong Kong";
+      break;
+  }
+  return new_name;
+}
+
+
 function type(d) {
+  d["CNT"] = shortCName(d["CNT"]);
+
   return d;
 }

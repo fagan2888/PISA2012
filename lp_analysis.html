@@ -51,17 +51,42 @@
 
 <div class="row">
   <div class="col-sm-9 comment">
-    <p>Who has the risk to become a low performer?<br>
-      Does social status or immigrant background matter? <br>
+    <p>Who has the risk to become a low performer? <br>
+      Does social status or immigrant background matter?
     </p>
     <p>
-      Further analysis based on logistic regression analysis considers influence
-      of some potential risk factors in different countries.
-      </p>
-      <p>
-        Disadvantaged social and economical status is the most important risk factor
-        for almost all countries. No pre-primary education is also a serious risk factor.  
-      </p>
+    Further analysis, based on multivariate logistic regression, considers how
+    different risk factors change (increase or decrease) the likelihood of low
+    performance in Math.
+  </p>
+  <p>
+    Risk factors were picked out manually according to common
+    practice and stereotypes. As a result, in some cases a risk factor can have
+    actually positive effect and decrease the likelihood of becoming a low performer. <br>
+    Note that influence of each risk factor is measured in comparison with alternative.
+    For example, influence of  “being a female” is measure in comparison with “being a male”,
+    “studying in public school” is compared with “studying in private school” and etc.
+  </p>
+  <p>
+    Having disadvantaged social and economical status and having no preschool
+    education are two most significant risk factors, which have negative effect
+    in all considered countries and economies.
+  </p>
+  <p>
+    In most country gender has very low influence. However, in Brazil, Chile
+    and Columbia “being a female” can have negative effect and increase likelihood
+    of low performance. On the contrary, in Thailand “being a female” has positive effect,
+    which means that male students have higher chances to become low performers.
+  </p>
+  <p>
+    In some countries school type is quite important and it is interesting to note
+    that public schools do not always have negative effect. For example, in Canada
+    and Japan being in public school decrease the likelihood of low performance
+     (comparing with private schools). In Brazil, Columbia and Peru situation is
+     the opposite, studying in public school has negative effect.
+   </p>
+
+
   </div>
 </div>
 
@@ -79,10 +104,10 @@
 
 
 <div class="row">
-  <div class="col-sm-9">
+  <div class="col-sm-9 bscont">
     <svg class="chart main"></svg>
   </div>
-  <div class="col-sm-3">
+  <div class="col-sm-3 bscont">
     <svg class="chart right"></svg>
 
 
@@ -91,7 +116,10 @@
 
 <div class="row">
   <div class="col-sm-9 comment">
-    <p> Notes:<br>
+    <p> Notes: </p>
+
+    <ul style="list-style-type:disc">
+    <li>
       Values in the heatmap correspond to coefficients of multivariate logistic
       regression. Low performance status (binary variable, 1 – student is low
       performer, 0 – otherwise) is regressed one a set of risk factors (categorical
@@ -99,14 +127,33 @@
       Positive coefficient value means that a factor has negative effect and
       increase the likelihood of low performance in Math; negative value means
       positive effect and decrease of likelihood of low performance in Math.
-    </p>
-    <p>
+    </li>
+    <li>
       Social and economical status is based on the PISA index of economic,
       social and cultural status. Disadvantaged status is defined as a status
       with the index below 25% quintile, threshold is defined separately for
       each country.
+  </li>
+  <li>
+    Note that value of logistic coefficients are not equivalent to the value of
+    change in likelihood, but show change in logarithm of odds ratio (odds ratio equals
+    to probability of becoming low performer divided by the probability of not
+    becoming low performer).
 
-  </p>
+  </li>
+
+  <li>
+    Used Abbreviations:<br>
+    UAE  -  United Arab Emirates <br>
+    USA  -  United States of America <br>
+    Russia  -  Russian Federation <br>
+    Perm(RF)  -  Perm(Russian Federation)<br>
+    Connecticut  -  Connecticut (USA)<br>
+    Massachusetts  -  Massachusetts (USA)<br>
+    Hong Kong  -  Hong Kong-China
+  </li>
+</ul>
+
   </div>
 </div>
 

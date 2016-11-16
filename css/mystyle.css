@@ -37,31 +37,17 @@
   	stroke: none;
   }
 
-
-/*button {
-    margin: 0 7px 0 0;
-    background-color: #f5f5f5;
-    border: 1px solid #dedede;
-    border-top: 1px solid #eee;
-    border-left: 1px solid #eee;
-
-    font-size: 12px;
-    line-height: 130%;
-    text-decoration: none;
-    font-weight: bold;
-    color: #565656;
-    cursor: pointer;
-}*/
-
 .comment
 {
     margin: 0px 10px 10px 10px;
 }
 
-.container
+.bscont
 {
      text-align: left;
+     overflow: auto;
 }
+
 .left-div
 {
      display: inline-block;
@@ -99,8 +85,8 @@ div.sorting {
 div.tooltip {
     position: absolute;
     text-align: start;
-    width: 160px;
-    height: 70px;
+    width: 180px;
+    height: 90px;
     padding: 2px;
     font: 12px sans-serif;
     background: lightsteelblue;
@@ -108,11 +94,6 @@ div.tooltip {
     border-radius: 8px;
     pointer-events: none;
 }
-
-/*.chartTitle {
-  font-family: Georgia, serif;
-
-}*/
 
 
 .chartTitle {
@@ -127,6 +108,21 @@ div.tooltip {
   font-size: 1.3rem;
   fill: #AAAAAA;
   font-weight: 300;
+  text-anchor: middle;
+  font-family: Georgia, serif;
+}
+
+.chartComment {
+  font-size: 1.3rem;
+  fill: #4F4F4F;
+  font-weight: 300;
+  text-anchor: middle;
+  font-family: Georgia, serif;
+}
+
+.chartCommentSmall {
+  font-size: 1.2rem;
+  fill: #AAAAAA;
   text-anchor: middle;
   font-family: Georgia, serif;
 }
