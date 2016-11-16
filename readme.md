@@ -14,13 +14,13 @@ _Performance Comparison_
 
 This visualization shows distribution of test scores in Math, Reading and Science for different countries and economies. Note that 10% of extreme cases were removed (scores below 5% percentile and above 95% percentile).  For more advanced analysis one can try different sort options:
 
-Sort by Performance Score Gap
+ * Sort by Performance Score Gap
 
-        First come countries and economies, which have the lowest difference between student`s test results (measured in score points).
+   First come countries and economies, which have the lowest difference between students&#39; test results (measured in score points).
 
-Sort by Country GDP
+ * Sort by Country GDP
 
-        For some countries or economies GDP was not available, so they are just hidden in this case
+   For some countries or economies GDP was not available, so they are just hidden in this case.
 
 _Low Performance_
 
@@ -77,8 +77,6 @@ I have added country median for test performance as a line.
 I labeled areas of performance gap values (three areas: lower 25% countries, middle 50% countries, upper 25% countried). It is shown only when &quot;Sort by Performance Score Gap&quot; is selected.
 
 I have highlighted low GDP countries (GDP below $20 000). It is shown only when &quot;Sort by GDP&quot; is selected.
-
-_   _
 
  **4.** _Misleading tooltips in Performance Comparison visualization._
 
@@ -200,4 +198,4 @@ Anastasia asked the following questions:
 
 [https://github.com/d3/d3/wiki/Gallery](https://github.com/d3/d3/wiki/Gallery)
 
-https://github.com/d3/d3/wiki
+[https://github.com/d3/d3/wiki](https://github.com/d3/d3/wiki)
