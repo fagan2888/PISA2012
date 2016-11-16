@@ -9,7 +9,8 @@ df <- data.frame(CODE=NA, CNT=NA, MATH_mean=NA, MATH_quant_05=NA,
                 READ_quant_25=NA, READ_quant_50=NA, READ_quant_75=NA,
                 READ_quant_95=NA,  SCIE_mean=NA, SCIE_quant_05=NA, 
                 SCIE_quant_25=NA, SCIE_quant_50=NA, SCIE_quant_75=NA,
-                SCIE_quant_95=NA)[numeric(0), ]
+                SCIE_quant_95=NA, MATH_min=NA, READ_min=NA, SCIE_min=NA,
+                MATH_max=NA, READ_max=NA, SCIE_max=NA)[numeric(0), ]
 
 df_lp <- data.frame(CODE=NA, CNT=NA, MATHLP_perc=NA, READLP_perc=NA, 
                     SCIELP_perc=NA, LPANY_perc=NA, LPALL_perc=NA,
@@ -37,9 +38,19 @@ for (code in levels(pisadat$CODE)) {
   
   MATHLP_notall_perc <- wtd.mean(data$MATH_ISLP_notall, weights = data$WEIGHT)
   
+  MATH_min = min(data$PVMATH);
+  READ_min = min(data$PVREAD)
+  SCIE_min = min(data$PVSCIE)
+  MATH_max = max(data$PVMATH);
+  READ_max = max(data$PVREAD)
+  SCIE_max = max(data$PVSCIE)
+  
+  
+    
   df[nrow(df)+1,] <- c(code, CNT, MATH_mean, MATH_quant, 
                      READ_mean, READ_quant, 
-                    SCIE_mean, SCIE_quant)
+                    SCIE_mean, SCIE_quant, MATH_min, READ_min, SCIE_min,
+                    MATH_max, READ_max, SCIE_max)
   
   df_lp[nrow(df_lp)+1,] <- c(code, CNT, MATHLP_perc, READLP_perc, SCIELP_perc,
                              LPANY_perc, LPALL_perc, MATHLP_notall_perc)
