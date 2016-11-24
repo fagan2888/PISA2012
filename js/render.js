@@ -403,8 +403,8 @@ selected subject and sorting.
 //**** Highlight sorted by median data ********************
   if (glb_sorting == "median") {
 
-    bestCountry = values[0].CNT;
-    worstCountry = values[values.length-1].CNT;
+    worstCountry = values[0].CNT;
+    bestCountry = values[values.length-1].CNT;
     diff = Math.ceil(values[values.length-1].median - values[0].median);
 
     chart.selectAll(".bar." + clname(bestCountry))
